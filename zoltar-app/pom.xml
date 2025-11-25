@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>ca.zoltar</groupId>
+    <artifactId>zoltar-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>zoltar-app</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>ca.zoltar</groupId>
+      <artifactId>zoltar-gui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ca.zoltar</groupId>
+      <artifactId>zoltar-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ca.zoltar</groupId>
+      <artifactId>zoltar-db</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ca.zoltar</groupId>
+      <artifactId>zoltar-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <configuration>
+          <mainClass>ca.zoltar.app.MainApp</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
