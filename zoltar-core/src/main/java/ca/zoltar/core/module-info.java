@@ -8,6 +8,7 @@ module ca.zoltar.core {
     requires org.slf4j;
     requires org.apache.pdfbox;
     requires com.fasterxml.jackson.databind;
+    requires org.apache.lucene.queryparser;
 
     exports ca.zoltar.core;
     exports ca.zoltar.core.service;
