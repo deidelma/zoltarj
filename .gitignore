@@ -85,3 +85,4 @@ indexes/
 
 # Configuration with sensitive data (API keys, etc.)
 config.json
+.env
