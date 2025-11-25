@@ -86,3 +86,8 @@ indexes/
 # Configuration with sensitive data (API keys, etc.)
 config.json
 .env
+
+# Temporary scripts with embedded secrets (use environment variables instead)
+generate_embeddings.sh
+generate_embeddings.py
+convert_embeddings.py
