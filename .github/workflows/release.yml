@@ -1,0 +1,88 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x build-runtime.sh
+          chmod +x package-macos.sh
+      
+      - name: Build macOS DMG
+        run: ./package-macos.sh dmg
+      
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zoltar-macOS-DMG
+          path: target/installer/*.dmg
+  
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+      
+      - name: Build Windows MSI
+        run: ./package-windows.bat msi
+        shell: cmd
+      
+      - name: Upload Windows MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zoltar-Windows-MSI
+          path: target/installer/*.msi
+  
+  create-release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Zoltar-macOS-DMG
+          path: ./installers
+      
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Zoltar-Windows-MSI
+          path: ./installers
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./installers/*
+          draft: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -105,11 +105,11 @@ zoltarj/
 - ✅ **Phase 5**: Hybrid Retrieval Service
 - ✅ **Phase 6**: LLM Evaluation Pipeline
 - ✅ **Phase 7**: JavaFX GUI Foundation (7 views, navigation, settings)
+- ✅ **Phase 8**: Packaging & Distribution (jlink, jpackage, CI/CD)
 
 ### In Progress
 
 - 🚧 **Phase 7**: Full CRUD implementation and service integration
-- 🚧 **Phase 8**: Packaging for macOS and Windows
 
 ## Prerequisites
 
@@ -179,6 +179,24 @@ cd zoltar-gui && mvn javafx:run
 # Or use the launcher script:
 ./run-gui.sh
 ```
+
+## Packaging and Distribution
+
+See [PACKAGING.md](PACKAGING.md) for detailed instructions on creating native installers.
+
+**Quick start:**
+
+```bash
+# macOS - Create DMG installer
+./build-runtime.sh
+./package-macos.sh dmg
+
+# Windows - Create MSI installer
+build-runtime-windows.sh
+package-windows.bat msi
+```
+
+The installers are self-contained and include everything needed to run Zoltar without requiring a separate JDK installation.
 
 ## Database Schema
 
