@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ca.zoltar.gui.controller.TopicsViewController"
+      spacing="10">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="Topics" styleClass="section-title" HBox.hgrow="ALWAYS"/>
+        <Button text="New Topic" onAction="#handleNewTopic" styleClass="button"/>
+        <Button text="Edit" onAction="#handleEditTopic" fx:id="btnEdit" disable="true"/>
+        <Button text="Delete" onAction="#handleDeleteTopic" fx:id="btnDelete" disable="true" styleClass="button, danger"/>
+    </HBox>
+    
+    <!-- Topics Table -->
+    <TableView fx:id="topicsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+            <TableColumn fx:id="nameColumn" text="Topic Name" prefWidth="250"/>
+            <TableColumn fx:id="queryColumn" text="PubMed Query" prefWidth="200"/>
+            <TableColumn fx:id="docsColumn" text="Documents" prefWidth="100"/>
+            <TableColumn fx:id="abstractsColumn" text="Abstracts" prefWidth="100"/>
+            <TableColumn fx:id="updatedColumn" text="Last Updated" prefWidth="150"/>
+        </columns>
+        <placeholder>
+            <Label text="No topics found. Create a new topic to get started."/>
+        </placeholder>
+    </TableView>
+    
+    <!-- Status -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label fx:id="statusLabel" text="" HBox.hgrow="ALWAYS"/>
+    </HBox>
+    
+</VBox>

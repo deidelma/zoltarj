@@ -104,10 +104,11 @@ zoltarj/
 - ✅ **Phase 4**: PubMed Monitor & Abstract Storage
 - ✅ **Phase 5**: Hybrid Retrieval Service
 - ✅ **Phase 6**: LLM Evaluation Pipeline
+- ✅ **Phase 7**: JavaFX GUI Foundation (7 views, navigation, settings)
 
 ### In Progress
 
-- 🚧 **Phase 7**: JavaFX GUI Completion
+- 🚧 **Phase 7**: Full CRUD implementation and service integration
 - 🚧 **Phase 8**: Packaging for macOS and Windows
 
 ## Prerequisites
@@ -172,6 +173,11 @@ mvn exec:java -pl zoltar-core -Dexec.mainClass="ca.zoltar.core.service.Phase5Dem
 
 # Phase 6: LLM Evaluation Pipeline
 mvn exec:java -pl zoltar-core -Dexec.mainClass="ca.zoltar.core.service.Phase6Demo"
+
+# Phase 7: JavaFX GUI Application
+cd zoltar-gui && mvn javafx:run
+# Or use the launcher script:
+./run-gui.sh
 ```
 
 ## Database Schema

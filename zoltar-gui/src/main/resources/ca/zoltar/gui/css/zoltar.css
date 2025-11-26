@@ -1,0 +1,221 @@
+/* Zoltar Application Stylesheet */
+
+/* Root color scheme */
+.root {
+    -fx-base: #f4f4f4;
+    -fx-background: #ffffff;
+    -fx-accent: #2196F3;
+    -fx-focus-color: #2196F3;
+    -fx-control-inner-background: white;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #263238;
+    -fx-padding: 10;
+}
+
+.app-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 10 0 10 0;
+}
+
+/* Navigation buttons */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B0BEC5;
+    -fx-font-size: 14px;
+    -fx-padding: 10;
+    -fx-alignment: CENTER-LEFT;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #37474F;
+    -fx-text-fill: white;
+}
+
+.nav-button.active {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-background-color: #ECEFF1;
+    -fx-border-color: #CFD8DC;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Tables */
+.table-view {
+    -fx-background-color: white;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #ECEFF1;
+}
+
+.table-view .column-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #263238;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #E3F2FD;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+    -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #1976D2;
+}
+
+.button:pressed {
+    -fx-background-color: #0D47A1;
+}
+
+.button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.button.secondary {
+    -fx-background-color: #757575;
+}
+
+.button.secondary:hover {
+    -fx-background-color: #616161;
+}
+
+.button.danger {
+    -fx-background-color: #F44336;
+}
+
+.button.danger:hover {
+    -fx-background-color: #D32F2F;
+}
+
+/* Text fields */
+.text-field, .text-area {
+    -fx-background-color: white;
+    -fx-border-color: #CFD8DC;
+    -fx-border-width: 1;
+    -fx-padding: 5;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #263238;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #263238;
+    -fx-padding: 10 0 10 0;
+}
+
+.field-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #546E7A;
+}
+
+/* Progress indicators */
+.progress-bar .track {
+    -fx-background-color: #ECEFF1;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #2196F3;
+}
+
+/* Separators */
+.separator {
+    -fx-background-color: #546E7A;
+}
+
+/* Scrollbars */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #B0BEC5;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #90A4AE;
+}
+
+/* Dialogs */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #2196F3;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Tooltips */
+.tooltip {
+    -fx-background-color: #263238;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+/* Combo boxes */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #CFD8DC;
+    -fx-border-width: 1;
+}
+
+.combo-box:focused {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+}
+
+/* Spinners and sliders */
+.spinner {
+    -fx-background-color: white;
+    -fx-border-color: #CFD8DC;
+}
+
+.slider .track {
+    -fx-background-color: #CFD8DC;
+}
+
+.slider .thumb {
+    -fx-background-color: #2196F3;
+}
+
+/* Menu bar */
+.menu-bar {
+    -fx-background-color: white;
+    -fx-border-color: #ECEFF1;
+    -fx-border-width: 0 0 1 0;
+}

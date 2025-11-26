@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ca.zoltar.gui.controller.LibraryViewController"
+      spacing="10">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="Library - Document Management" styleClass="section-title"/>
+    <Label text="Select a topic from the Topics view to manage its documents."/>
+    
+    <HBox spacing="10">
+        <Button text="Add PDF(s)" onAction="#handleAddPdfs" disable="true"/>
+        <Button text="Re-index Selected" onAction="#handleReindex" disable="true"/>
+        <Button text="Delete Selected" onAction="#handleDelete" disable="true" styleClass="button, danger"/>
+    </HBox>
+    
+    <TableView fx:id="documentsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn text="ID" prefWidth="60"/>
+            <TableColumn text="Title" prefWidth="300"/>
+            <TableColumn text="Filename" prefWidth="200"/>
+            <TableColumn text="Chunks" prefWidth="80"/>
+            <TableColumn text="Status" prefWidth="120"/>
+            <TableColumn text="Added" prefWidth="150"/>
+        </columns>
+        <placeholder>
+            <Label text="Select a topic to view its documents"/>
+        </placeholder>
+    </TableView>
+    
+</VBox>

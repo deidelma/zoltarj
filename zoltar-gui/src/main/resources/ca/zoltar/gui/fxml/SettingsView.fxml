@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ca.zoltar.gui.controller.SettingsViewController"
+      spacing="15">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="Settings" styleClass="section-title"/>
+    
+    <!-- OpenAI Configuration -->
+    <Label text="OpenAI Configuration" styleClass="field-label"/>
+    <GridPane hgap="10" vgap="10">
+        <Label text="API Key:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <PasswordField fx:id="apiKeyField" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="400"/>
+        
+        <Label text="Chat Model:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="chatModelField" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="400"/>
+        
+        <Label text="Embedding Model:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="embeddingModelField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="400"/>
+    </GridPane>
+    
+    <Separator/>
+    
+    <!-- Retrieval Defaults -->
+    <Label text="Retrieval Defaults" styleClass="field-label"/>
+    <GridPane hgap="10" vgap="10">
+        <Label text="Chunk Size:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Spinner fx:id="chunkSizeSpinner" initialValue="512" min="128" max="2048" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        
+        <Label text="Chunk Overlap:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <Spinner fx:id="chunkOverlapSpinner" initialValue="128" min="0" max="512" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        
+        <Label text="Default Alpha:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Spinner fx:id="defaultAlphaSpinner" initialValue="0.6" min="0.0" max="1.0" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    </GridPane>
+    
+    <Separator/>
+    
+    <!-- Actions -->
+    <HBox spacing="10">
+        <Button text="Save Settings" onAction="#handleSave"/>
+        <Button text="Reset to Defaults" onAction="#handleReset" styleClass="button, secondary"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="statusLabel" text=""/>
+    </HBox>
+    
+    <Region VBox.vgrow="ALWAYS"/>
+    
+</VBox>

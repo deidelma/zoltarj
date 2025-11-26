@@ -1,4 +1,4 @@
-package ca.zoltar.app;
+package ca.zoltar.gui;
 
 import ca.zoltar.db.DatabaseManager;
 import ca.zoltar.util.ConfigManager;

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ca.zoltar.gui.controller.PubMedMonitorViewController"
+      spacing="10">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="PubMed Monitor" styleClass="section-title"/>
+    
+    <GridPane hgap="10" vgap="10">
+        <Label text="Topic:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <ComboBox fx:id="topicCombo" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="300"/>
+        
+        <Label text="Query:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="queryField" GridPane.columnIndex="1" GridPane.rowIndex="1" editable="false" prefWidth="300"/>
+    </GridPane>
+    
+    <HBox spacing="10">
+        <Button text="Dry Run Search" onAction="#handleDryRun" disable="true"/>
+        <Button text="Fetch New Abstracts" onAction="#handleFetch" disable="true"/>
+    </HBox>
+    
+    <TableView fx:id="abstractsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn text="PMID" prefWidth="100"/>
+            <TableColumn text="Title" prefWidth="400"/>
+            <TableColumn text="Journal" prefWidth="200"/>
+            <TableColumn text="Date" prefWidth="100"/>
+            <TableColumn text="Status" prefWidth="100"/>
+        </columns>
+        <placeholder>
+            <Label text="Select a topic and run a search"/>
+        </placeholder>
+    </TableView>
+    
+</VBox>
