@@ -1,9 +1,9 @@
 #!/bin/bash
-# Build script for creating a custom JRE runtime image using jlink
+# Build script for creating a distributable package using jpackage
 
 set -e
 
-echo "=== Building Zoltar Custom Runtime with jlink ==="
+echo "=== Building Zoltar Package with jpackage ==="
 
 # Ensure we're in the project root
 cd "$(dirname "$0")"
@@ -12,59 +12,54 @@ cd "$(dirname "$0")"
 echo "Building project..."
 mvn clean package -DskipTests
 
-# Prepare module path
-MODULE_PATH="zoltar-app/target/zoltar-app-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-gui/target/zoltar-gui-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-core/target/zoltar-core-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-db/target/zoltar-db-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-search/target/zoltar-search-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-pubmed/target/zoltar-pubmed-1.0.0-SNAPSHOT.jar"
-MODULE_PATH="${MODULE_PATH}:zoltar-util/target/zoltar-util-1.0.0-SNAPSHOT.jar"
+# Copy all dependencies to a lib folder
+echo "Preparing dependencies..."
+LIB_DIR="target/lib"
+rm -rf "$LIB_DIR"
+mkdir -p "$LIB_DIR"
 
-# Add dependencies (JavaFX, Lucene, SQLite, etc.)
-for jar in zoltar-gui/target/lib/*.jar; do
-    if [ -f "$jar" ]; then
-        MODULE_PATH="${MODULE_PATH}:${jar}"
-    fi
-done
+# Copy all module JARs
+cp zoltar-app/target/zoltar-app-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-gui/target/zoltar-gui-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-core/target/zoltar-core-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-db/target/zoltar-db-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-search/target/zoltar-search-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-pubmed/target/zoltar-pubmed-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
+cp zoltar-util/target/zoltar-util-1.0.0-SNAPSHOT.jar "$LIB_DIR/"
 
-# Detect JavaFX modules path
-if [ -z "$JAVAFX_MODS" ]; then
-    # Try to find JavaFX mods from Maven repository
-    JAVAFX_VERSION="21.0.1"
-    MAVEN_REPO="${HOME}/.m2/repository"
-    JAVAFX_BASE="${MAVEN_REPO}/org/openjfx"
-    
-    if [ -d "$JAVAFX_BASE" ]; then
-        MODULE_PATH="${MODULE_PATH}:${JAVAFX_BASE}/javafx-base/${JAVAFX_VERSION}/javafx-base-${JAVAFX_VERSION}-mac.jar"
-        MODULE_PATH="${MODULE_PATH}:${JAVAFX_BASE}/javafx-controls/${JAVAFX_VERSION}/javafx-controls-${JAVAFX_VERSION}-mac.jar"
-        MODULE_PATH="${MODULE_PATH}:${JAVAFX_BASE}/javafx-fxml/${JAVAFX_VERSION}/javafx-fxml-${JAVAFX_VERSION}-mac.jar"
-        MODULE_PATH="${MODULE_PATH}:${JAVAFX_BASE}/javafx-graphics/${JAVAFX_VERSION}/javafx-graphics-${JAVAFX_VERSION}-mac.jar"
-    fi
-fi
+# Copy all runtime dependencies from maven
+mvn dependency:copy-dependencies -DoutputDirectory="../target/lib" -pl zoltar-gui -DincludeScope=runtime
 
-# Add JDK modules
-MODULE_PATH="${MODULE_PATH}:${JAVA_HOME}/jmods"
+echo "✓ Dependencies copied to $LIB_DIR"
+echo "  JAR count: $(ls -1 $LIB_DIR/*.jar | wc -l)"
 
-echo "Module path: $MODULE_PATH"
-
-# Create custom runtime image
-echo "Creating custom runtime with jlink..."
-OUTPUT_DIR="target/zoltar-runtime"
-
+# Create runtime image with jpackage
+echo "Creating native package with jpackage..."
+OUTPUT_DIR="target/installer"
 rm -rf "$OUTPUT_DIR"
+mkdir -p "$OUTPUT_DIR"
 
-jlink \
-    --module-path "$MODULE_PATH" \
-    --add-modules ca.zoltar.app,javafx.controls,javafx.fxml,javafx.graphics \
-    --strip-debug \
-    --no-header-files \
-    --no-man-pages \
-    --compress=2 \
-    --output "$OUTPUT_DIR"
+jpackage \
+    --type app-image \
+    --input "$LIB_DIR" \
+    --name "Zoltar" \
+    --main-jar zoltar-gui-1.0.0-SNAPSHOT.jar \
+    --main-class ca.zoltar.gui.MainApp \
+    --dest "$OUTPUT_DIR" \
+    --java-options '-Xmx2g' \
+    --java-options '--module-path $APPDIR' \
+    --java-options '--add-modules javafx.controls,javafx.fxml' \
+    --java-options '--enable-native-access=javafx.graphics,org.xerial.sqlitejdbc' \
+    --app-version "1.0.0" \
+    --description "Zoltar - Intelligent Literature Analysis Tool" \
+    --vendor "Zoltar Project"
 
-echo "=== Runtime image created at $OUTPUT_DIR ==="
+echo "=== Package created at $OUTPUT_DIR ==="
 echo "Size: $(du -sh $OUTPUT_DIR | cut -f1)"
 echo ""
-echo "To test the runtime:"
-echo "  $OUTPUT_DIR/bin/java -m ca.zoltar.app/ca.zoltar.app.MainApp"
+echo "To run the application:"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "  $OUTPUT_DIR/Zoltar.app/Contents/MacOS/Zoltar"
+else
+    echo "  $OUTPUT_DIR/Zoltar/bin/Zoltar"
+fi

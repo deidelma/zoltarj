@@ -10,28 +10,37 @@ This directory contains scripts for packaging Zoltar as native installers for ma
 
 ## Build Steps
 
-### 1. Build the Project
+### Option 1: Quick Build (Recommended)
 
-```bash
-mvn clean package -DskipTests
-```
+The `build-runtime.sh` script creates a ready-to-run macOS application bundle using `jpackage`:
 
-### 2. Create Custom Runtime (jlink)
-
-**macOS/Linux:**
+**macOS:**
 ```bash
 chmod +x build-runtime.sh
 ./build-runtime.sh
 ```
 
-**Windows:**
-```cmd
-build-runtime.bat
+This creates `target/installer/Zoltar.app` (~130 MB) which can be launched immediately:
+```bash
+open target/installer/Zoltar.app
 ```
 
-This creates a trimmed JRE in `target/zoltar-runtime` containing only the modules needed by Zoltar.
+The app bundle can be:
+- Launched directly from the target folder
+- Copied to `/Applications` for permanent installation
+- Distributed as-is (no additional packaging needed)
+- Further packaged into DMG/PKG (see Optional step below)
 
-### 3. Package the Application (jpackage)
+**Windows:**
+```cmd
+build-runtime-windows.sh
+```
+
+This creates `target\installer\Zoltar\` which includes `Zoltar.exe`.
+
+### Option 2: Create Native Installers (Optional)
+
+If you want to create a DMG or MSI installer for easier distribution:
 
 **macOS - DMG:**
 ```bash
@@ -86,19 +95,23 @@ Expected sizes:
 ## Troubleshooting
 
 ### "Module not found" errors
-- Ensure all modules are built: `mvn clean package`
+- Ensure all modules are built: The build script automatically runs `mvn clean package`
 - Check that `module-info.java` exports are correct
-
-### JavaFX modules not found
-- Set `JAVAFX_MODS` environment variable to JavaFX jmods directory
-- Or ensure JavaFX is in Maven local repository
 
 ### jpackage command not found
 - Ensure using JDK 21+ (not JRE)
 - Check `java -version` shows correct JDK path
+- jpackage is included in JDK 14+
 
 ### Installer won't launch
 - Check application logs (macOS: Console.app, Windows: Event Viewer)
+- Verify dependencies are copied to `target/lib/`
+- Ensure main class is accessible: `ca.zoltar.gui.MainApp`
+
+### Build script fails
+- Make sure Maven is installed and in PATH
+- Check internet connection (for downloading dependencies)
+- Run `mvn dependency:copy-dependencies` separately to verify dependency resolution
 - Verify `~/.zoltar-java/` directory permissions
 - Ensure OpenAI API key is configured in `~/.zoltar-java/config.json`
 

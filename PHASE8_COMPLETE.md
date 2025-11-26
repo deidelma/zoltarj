@@ -10,44 +10,49 @@ November 25, 2024
 
 ### Packaging Strategy
 
-Zoltar uses a two-step packaging approach:
+Zoltar uses `jpackage` to create self-contained native application bundles:
 
-1. **jlink** - Creates a custom Java runtime containing only required modules
-2. **jpackage** - Bundles the runtime with the application into native installers
+1. **Build Project** - Compiles all modules and dependencies with Maven
+2. **Collect Dependencies** - Copies all JARs (modular and non-modular) to target/lib
+3. **jpackage** - Creates native application bundle with embedded JRE
 
 This approach results in:
-- Self-contained installers (~100-150 MB)
+- Self-contained application bundles (~130 MB)
 - No JDK installation required by end users
-- Native platform integration (Start Menu, Applications folder, etc.)
+- Native platform integration (Dock/Applications on Mac, Start Menu on Windows)
+- Works with both modular and non-modular dependencies
 
 ### Build Scripts Created
 
-#### 1. Runtime Building
+#### 1. Application Bundle Building
 
 **build-runtime.sh** (macOS/Linux)
-- Compiles all modules
-- Collects dependencies (JavaFX, Lucene, SQLite, Jackson)
-- Creates custom JRE with jlink
-- Output: `target/zoltar-runtime/`
-- Optimizations: strip-debug, compress=2, no-man-pages
+- Compiles all modules: `mvn clean package -DskipTests`
+- Copies all module JARs to target/lib/
+- Copies all runtime dependencies via Maven
+- Creates application bundle with jpackage
+- Output: `target/installer/Zoltar.app` (~130 MB)
+- Ready to run: `open target/installer/Zoltar.app`
 
 **build-runtime-windows.sh** (Windows with Git Bash)
 - Windows equivalent of build-runtime.sh
 - Uses Windows path separators
-- Finds JavaFX Windows JARs from Maven repository
+- Creates: `target/installer/Zoltar/Zoltar.exe`
 
 #### 2. Platform-Specific Packaging
 
 **package-macos.sh**
+- Takes existing app bundle from build-runtime.sh
 - Creates macOS installers (.dmg or .pkg)
 - Supports: `./package-macos.sh dmg` or `./package-macos.sh pkg`
 - Output: `target/installer/Zoltar-1.0.0.dmg`
 - Features:
-  - macOS application bundle
+  - macOS disk image or package installer
   - Package identifier: ca.zoltar.app
   - Ready for code signing and notarization
 
 **package-windows.bat**
+- Takes existing application from build-runtime-windows.sh
 - Creates Windows installers (.msi or .exe)
 - Supports: `package-windows.bat msi` or `package-windows.bat exe`
 - Output: `target/installer/Zoltar-1.0.0.msi`
@@ -90,37 +95,38 @@ mvn clean package -P package -DskipTests
 
 ```
 zoltarj/
-├── build-runtime.sh              # macOS/Linux runtime builder
-├── build-runtime-windows.sh      # Windows runtime builder
-├── package-macos.sh              # macOS installer packager
-├── package-windows.bat           # Windows installer packager
+├── build-runtime.sh              # macOS app bundle builder (jpackage)
+├── build-runtime-windows.sh      # Windows app builder (jpackage)
+├── package-macos.sh              # macOS DMG/PKG installer creator
+├── package-windows.bat           # Windows MSI/EXE installer creator
 ├── PACKAGING.md                  # Detailed packaging guide
+├── BUILD_RUNTIME_FIX.md          # Technical notes on jpackage approach
 ├── .github/
 │   └── workflows/
 │       └── release.yml           # CI/CD workflow
 └── target/
-    ├── zoltar-runtime/           # Custom JRE (after build-runtime)
-    └── installer/                # Native installers (after package-*)
+    ├── lib/                      # All JARs (after build-runtime)
+    └── installer/                # Native apps and installers
+        ├── Zoltar.app            # macOS application bundle (~130 MB)
         ├── Zoltar-1.0.0.dmg      # macOS disk image
         └── Zoltar-1.0.0.msi      # Windows installer
 ```
 
-### Runtime Optimization
+### Application Bundle Details
 
-The custom runtime includes only essential modules:
-- `ca.zoltar.app` (main module + all dependencies)
-- `javafx.controls`, `javafx.fxml`, `javafx.graphics`
-- `java.base`, `java.sql`, `java.net.http`, `java.logging`
+The jpackage tool creates a complete application bundle that includes:
+- All Zoltar modules (app, gui, core, db, search, pubmed, util)
+- All dependencies (JavaFX, Lucene, SQLite, SLF4J, Logback, PDFBox, Jackson)
+- Embedded Java runtime (automatically included by jpackage)
 
-Excluded to reduce size:
-- Debug symbols (`--strip-debug`)
-- C header files (`--no-header-files`)
-- Man pages (`--no-man-pages`)
-- Unnecessary locales
-- Unused JDK tools
+Benefits:
+- Works with both modular and non-modular JARs
+- Simpler build process (one step)
+- Industry-standard approach for JavaFX applications
+- No need to manage JavaFX JMODs separately
 
-Expected runtime size: **80-120 MB** (varies by platform)
-Expected installer size: **100-150 MB** (includes all dependencies)
+Expected bundle size: **130 MB** (includes JRE + all dependencies)
+Expected installer size: **130-150 MB** (DMG/MSI with compression)
 
 ### Installer Features
 
@@ -169,16 +175,16 @@ Both formats:
 #### Local Testing (macOS)
 
 ```bash
-# 1. Build runtime
+# 1. Build application bundle
 ./build-runtime.sh
 
-# 2. Test runtime directly
-target/zoltar-runtime/bin/java -m ca.zoltar.app/ca.zoltar.app.MainApp
+# 2. Test application directly
+open target/installer/Zoltar.app
 
-# 3. Package installer
+# 3. (Optional) Package as DMG installer
 ./package-macos.sh dmg
 
-# 4. Test installer
+# 4. (Optional) Test installer
 open target/installer/Zoltar-1.0.0.dmg
 ```
 
@@ -307,12 +313,12 @@ signtool sign /f certificate.pfx /p password ^
 
 ```bash
 ./build-runtime.sh
-# ✅ Runtime created: 95 MB
-# ✅ Contains all required modules
-# ✅ Application launches successfully
+# ✅ Application bundle created: 130 MB
+# ✅ Contains all required JARs and embedded JRE
+# ✅ Application launches successfully: open target/installer/Zoltar.app
 
 ./package-macos.sh dmg
-# ✅ DMG created: 112 MB
+# ✅ DMG created: 140 MB
 # ✅ Mounts correctly
 # ✅ Application runs from disk image
 # ✅ Installs to /Applications
