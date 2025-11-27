@@ -4,6 +4,8 @@ import ca.zoltar.util.ConfigManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,13 +15,13 @@ import java.sql.Statement;
 public class DatabaseManager {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
     private static final String DB_FILE_NAME = "zoltar.db";
+    private static final String DB_OVERRIDE_PROPERTY = "zoltar.db.path";
     
     private static DatabaseManager instance;
     private final String connectionString;
 
     private DatabaseManager() {
-        Path appDir = ConfigManager.getInstance().getAppDir();
-        Path dbPath = appDir.resolve(DB_FILE_NAME);
+        Path dbPath = resolveDatabasePath();
         this.connectionString = "jdbc:sqlite:" + dbPath.toAbsolutePath();
         
         initializeDatabase();
@@ -34,6 +36,31 @@ public class DatabaseManager {
 
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(connectionString);
+    }
+
+    public static synchronized void resetForTests() {
+        instance = null;
+    }
+
+    private Path resolveDatabasePath() {
+        String overridePath = System.getProperty(DB_OVERRIDE_PROPERTY);
+        if (overridePath != null && !overridePath.isBlank()) {
+            Path override = Path.of(overridePath).toAbsolutePath();
+            Path parent = override.getParent();
+            if (parent != null && !Files.exists(parent)) {
+                try {
+                    Files.createDirectories(parent);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to create override database directory", e);
+                }
+            }
+            logger.info("Using overridden database path: {}", override);
+            return override;
+        }
+
+        Path appDir = ConfigManager.getInstance().getAppDir();
+        Path dbPath = appDir.resolve(DB_FILE_NAME);
+        return dbPath;
     }
 
     private void initializeDatabase() {

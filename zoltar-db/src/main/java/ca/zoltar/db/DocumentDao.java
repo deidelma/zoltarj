@@ -96,6 +96,21 @@ public class DocumentDao {
         return null;
     }
 
+    public int countByTopicId(int topicId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM document WHERE topic_id = ?";
+
+        try (Connection conn = DatabaseManager.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, topicId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
     private Document mapRow(ResultSet rs) throws SQLException {
         return new Document(
             rs.getInt("id"),

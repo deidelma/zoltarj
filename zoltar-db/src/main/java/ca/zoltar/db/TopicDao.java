@@ -74,6 +74,51 @@ public class TopicDao {
         return Optional.empty();
     }
 
+    public Topic update(int id, String name, String queryString, String notes) throws SQLException {
+        String sql = "UPDATE topic SET name = ?, query_string = ?, notes = ?, updated_at = ? WHERE id = ?";
+        String now = LocalDateTime.now().toString();
+
+        try (Connection conn = DatabaseManager.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, queryString);
+            pstmt.setString(3, notes);
+            pstmt.setString(4, now);
+            pstmt.setInt(5, id);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Updating topic failed, no rows affected.");
+            }
+        }
+
+        return findById(id).orElseThrow(() -> new SQLException("Updated topic not found"));
+    }
+
+    public void deleteCascade(int topicId) throws SQLException {
+        try (Connection conn = DatabaseManager.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                executeUpdate(conn, "DELETE FROM evaluation_result WHERE run_id IN (SELECT id FROM evaluation_run WHERE topic_id = ?)", topicId);
+                executeUpdate(conn, "DELETE FROM evaluation_run WHERE topic_id = ?", topicId);
+                executeUpdate(conn, "DELETE FROM embedding WHERE chunk_id IN (SELECT id FROM chunk WHERE topic_id = ?)", topicId);
+                executeUpdate(conn, "DELETE FROM chunk WHERE topic_id = ?", topicId);
+                executeUpdate(conn, "DELETE FROM document WHERE topic_id = ?", topicId);
+                executeUpdate(conn, "DELETE FROM abstract WHERE topic_id = ?", topicId);
+                executeUpdate(conn, "DELETE FROM pubmed_seen WHERE topic_id = ?", topicId);
+                executeUpdate(conn, "DELETE FROM topic WHERE id = ?", topicId);
+                conn.commit();
+                logger.info("Deleted topic {} and dependent records", topicId);
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
+
     private Topic mapRow(ResultSet rs) throws SQLException {
         return new Topic(
             rs.getInt("id"),
@@ -83,5 +128,12 @@ public class TopicDao {
             rs.getString("created_at"),
             rs.getString("updated_at")
         );
+    }
+
+    private void executeUpdate(Connection conn, String sql, int topicId) throws SQLException {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, topicId);
+            pstmt.executeUpdate();
+        }
     }
 }

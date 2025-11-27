@@ -13,6 +13,7 @@ Zoltar ingests topic-specific PDFs (published articles, reports, etc.) and uses 
 ## Key Features
 
 - **Topic-based organization**: Manage multiple research topics, each with its own corpus and PubMed query
+- **Topic editing & cleanup**: Rename topics, update PubMed queries, and delete topics (with document/abstract counts) directly from the GUI
 - **PDF ingestion**: Extract and chunk text from PDFs for indexing
 - **Hybrid retrieval**: Combine dense semantic search and sparse lexical search for optimal context selection
 - **PubMed monitoring**: Automatically discover new abstracts matching topic queries
@@ -137,6 +138,10 @@ Create `~/.zoltar-java/config.json`:
   }
 }
 ```
+
+### Development tips
+
+- Set the system property `-Dzoltar.db.path=/absolute/path/to/zoltar.db` to override the default SQLite location. This is useful for test runs and isolates developer experiments from production data.
 
 ## Building
 
