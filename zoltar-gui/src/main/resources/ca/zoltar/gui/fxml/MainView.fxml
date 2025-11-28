@@ -2,14 +2,13 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ca.zoltar.gui.controller.MainViewController"
-            prefHeight="700.0" prefWidth="1000.0"
-            stylesheets="@../css/zoltar.css">
-    
+    xmlns:fx="http://javafx.com/fxml" fx:controller="ca.zoltar.gui.controller.MainViewController" prefHeight="700.0" prefWidth="1000.0" stylesheets="@../css/zoltar.css">
+
     <!-- Top Menu Bar -->
     <top>
         <MenuBar>
@@ -21,7 +20,7 @@
             </Menu>
         </MenuBar>
     </top>
-    
+
     <!-- Main Content -->
     <left>
         <!-- Navigation Sidebar -->
@@ -29,35 +28,35 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            
+
+            <Label text="ZOLTAR" styleClass="app-heading"/>
+            <ImageView fitWidth="100" fitHeight="200" preserveRatio="true" smooth="true" styleClass="app-logo">
+                <image>
+                    <Image url="@../images/zoltar.png"/>
+                </image>
+            </ImageView>
             <Label text="ZOLTAR" styleClass="app-title"/>
             <Separator/>
-            
-            <Button fx:id="btnTopics" text="Topics" onAction="#showTopics" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnLibrary" text="Library" onAction="#showLibrary" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnPubMed" text="PubMed Monitor" onAction="#showPubMed" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnEvaluate" text="Evaluate" onAction="#showEvaluate" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
-            <Button fx:id="btnResults" text="Results" onAction="#showResults" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
-            
+
+            <Button fx:id="btnTopics" text="Topics" onAction="#showTopics" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnLibrary" text="Library" onAction="#showLibrary" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnPubMed" text="PubMed Monitor" onAction="#showPubMed" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnEvaluate" text="Evaluate" onAction="#showEvaluate" maxWidth="Infinity" styleClass="nav-button"/>
+            <Button fx:id="btnResults" text="Results" onAction="#showResults" maxWidth="Infinity" styleClass="nav-button"/>
+
             <Region VBox.vgrow="ALWAYS"/>
-            
-            <Button fx:id="btnSettings" text="Settings" onAction="#showSettings" 
-                    maxWidth="Infinity" styleClass="nav-button"/>
+
+            <Button fx:id="btnSettings" text="Settings" onAction="#showSettings" maxWidth="Infinity" styleClass="nav-button"/>
         </VBox>
     </left>
-    
+
     <!-- Content Area -->
     <center>
         <StackPane fx:id="contentArea">
             <!-- Views will be loaded here dynamically -->
         </StackPane>
     </center>
-    
+
     <!-- Status Bar -->
     <bottom>
         <HBox styleClass="status-bar" spacing="10">
@@ -68,5 +67,5 @@
             <ProgressBar fx:id="statusProgress" prefWidth="150" visible="false"/>
         </HBox>
     </bottom>
-    
+
 </BorderPane>
