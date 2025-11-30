@@ -5,35 +5,41 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ca.zoltar.gui.controller.LibraryViewController"
-      spacing="10">
-    
+    xmlns:fx="http://javafx.com/fxml" fx:controller="ca.zoltar.gui.controller.LibraryViewController" spacing="10">
+
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
-    
+
     <Label text="Library - Document Management" styleClass="section-title"/>
-    <Label text="Select a topic from the Topics view to manage its documents."/>
-    
-    <HBox spacing="10">
-        <Button text="Add PDF(s)" onAction="#handleAddPdfs" disable="true"/>
-        <Button text="Re-index Selected" onAction="#handleReindex" disable="true"/>
-        <Button text="Delete Selected" onAction="#handleDelete" disable="true" styleClass="button, danger"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Topic:"/>
+        <ComboBox fx:id="topicCombo" prefWidth="300"/>
     </HBox>
-    
+
+    <HBox spacing="10">
+        <Button fx:id="btnAddPdfs" text="Add PDF(s)" onAction="#handleAddPdfs" disable="true"/>
+        <Button fx:id="btnReindex" text="Re-index Selected" onAction="#handleReindex" disable="true"/>
+        <Button fx:id="btnDelete" text="Delete Selected" onAction="#handleDelete" disable="true" styleClass="button, danger"/>
+    </HBox>
+
     <TableView fx:id="documentsTable" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn text="ID" prefWidth="60"/>
-            <TableColumn text="Title" prefWidth="300"/>
-            <TableColumn text="Filename" prefWidth="200"/>
-            <TableColumn text="Chunks" prefWidth="80"/>
-            <TableColumn text="Status" prefWidth="120"/>
-            <TableColumn text="Added" prefWidth="150"/>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+            <TableColumn fx:id="titleColumn" text="Title" prefWidth="300"/>
+            <TableColumn fx:id="filenameColumn" text="Filename" prefWidth="200"/>
+            <TableColumn fx:id="chunksColumn" text="Chunks" prefWidth="80"/>
+            <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
+            <TableColumn fx:id="addedColumn" text="Added" prefWidth="150"/>
         </columns>
         <placeholder>
             <Label text="Select a topic to view its documents"/>
         </placeholder>
     </TableView>
-    
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label fx:id="statusLabel" text="" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
 </VBox>

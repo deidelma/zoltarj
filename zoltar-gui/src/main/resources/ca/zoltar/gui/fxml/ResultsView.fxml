@@ -5,16 +5,14 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ca.zoltar.gui.controller.ResultsViewController"
-      spacing="10">
-    
+    xmlns:fx="http://javafx.com/fxml" fx:controller="ca.zoltar.gui.controller.ResultsViewController" spacing="10">
+
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
-    
+
     <Label text="Evaluation Results" styleClass="section-title"/>
-    
+
     <HBox spacing="10">
         <Label text="Filter by:"/>
         <ComboBox fx:id="labelFilter" promptText="Novelty Label"/>
@@ -24,23 +22,23 @@
         <Button text="Export CSV" onAction="#handleExportCsv"/>
         <Button text="Export JSON" onAction="#handleExportJson"/>
     </HBox>
-    
+
     <SplitPane orientation="VERTICAL" VBox.vgrow="ALWAYS">
         <!-- Results table -->
         <TableView fx:id="resultsTable" SplitPane.resizableWithParent="true">
             <columns>
-                <TableColumn text="Date" prefWidth="150"/>
-                <TableColumn text="Topic" prefWidth="150"/>
-                <TableColumn text="PMID" prefWidth="100"/>
-                <TableColumn text="Title" prefWidth="300"/>
-                <TableColumn text="Label" prefWidth="100"/>
-                <TableColumn text="Score" prefWidth="80"/>
+                <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+                <TableColumn fx:id="topicColumn" text="Topic" prefWidth="150"/>
+                <TableColumn fx:id="pmidColumn" text="PMID" prefWidth="100"/>
+                <TableColumn fx:id="titleColumn" text="Title" prefWidth="300"/>
+                <TableColumn fx:id="labelColumn" text="Label" prefWidth="100"/>
+                <TableColumn fx:id="scoreColumn" text="Score" prefWidth="80"/>
             </columns>
             <placeholder>
                 <Label text="No evaluation results found"/>
             </placeholder>
         </TableView>
-        
+
         <!-- Detail pane -->
         <VBox spacing="10" SplitPane.resizableWithParent="false">
             <padding>
@@ -50,5 +48,5 @@
             <TextArea fx:id="detailArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
         </VBox>
     </SplitPane>
-    
+
 </VBox>

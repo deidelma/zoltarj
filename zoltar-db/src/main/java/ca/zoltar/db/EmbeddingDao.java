@@ -15,14 +15,15 @@ import java.util.List;
 public class EmbeddingDao {
     private static final Logger logger = LoggerFactory.getLogger(EmbeddingDao.class);
 
-    public record Embedding(int id, int chunkId, String model, float[] vector, String createdAt) {}
+    public record Embedding(int id, int chunkId, String model, float[] vector, String createdAt) {
+    }
 
     /**
      * Create a new embedding record.
      * 
      * @param chunkId The chunk ID this embedding belongs to
-     * @param model The embedding model used
-     * @param vector The embedding vector
+     * @param model   The embedding model used
+     * @param vector  The embedding vector
      * @return The ID of the created embedding
      * @throws SQLException If database operation fails
      */
@@ -31,16 +32,18 @@ public class EmbeddingDao {
         String now = LocalDateTime.now().toString();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, chunkId);
             pstmt.setString(2, model);
             pstmt.setBytes(3, serializeVector(vector));
             pstmt.setString(4, now);
-            
+
             pstmt.executeUpdate();
-            
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+
+            // SQLite-specific way to get last insert ID
+            try (Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
                 if (rs.next()) {
                     int id = rs.getInt(1);
                     logger.debug("Created embedding {} for chunk {} with model {}", id, chunkId, model);
@@ -63,8 +66,8 @@ public class EmbeddingDao {
         String now = LocalDateTime.now().toString();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             conn.setAutoCommit(false);
             try {
                 for (EmbeddingInput emb : embeddings) {
@@ -90,7 +93,7 @@ public class EmbeddingDao {
      * Find an embedding by chunk ID and model.
      * 
      * @param chunkId The chunk ID
-     * @param model The embedding model
+     * @param model   The embedding model
      * @return The embedding, or null if not found
      * @throws SQLException If database operation fails
      */
@@ -98,11 +101,11 @@ public class EmbeddingDao {
         String sql = "SELECT * FROM embedding WHERE chunk_id = ? AND model = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, chunkId);
             pstmt.setString(2, model);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
@@ -116,26 +119,26 @@ public class EmbeddingDao {
      * Find all embeddings for a topic.
      * 
      * @param topicId The topic ID
-     * @param model The embedding model to filter by
+     * @param model   The embedding model to filter by
      * @return List of embeddings
      * @throws SQLException If database operation fails
      */
     public List<Embedding> findByTopicId(int topicId, String model) throws SQLException {
         String sql = """
-            SELECT e.* FROM embedding e
-            JOIN chunk c ON e.chunk_id = c.id
-            WHERE c.topic_id = ? AND e.model = ?
-            ORDER BY c.document_id, c.chunk_index
-        """;
+                    SELECT e.* FROM embedding e
+                    JOIN chunk c ON e.chunk_id = c.id
+                    WHERE c.topic_id = ? AND e.model = ?
+                    ORDER BY c.document_id, c.chunk_index
+                """;
 
         List<Embedding> embeddings = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, topicId);
             pstmt.setString(2, model);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     embeddings.add(mapRow(rs));
@@ -149,23 +152,23 @@ public class EmbeddingDao {
      * Count embeddings for a topic.
      * 
      * @param topicId The topic ID
-     * @param model The embedding model
+     * @param model   The embedding model
      * @return Count of embeddings
      * @throws SQLException If database operation fails
      */
     public int countByTopicId(int topicId, String model) throws SQLException {
         String sql = """
-            SELECT COUNT(*) FROM embedding e
-            JOIN chunk c ON e.chunk_id = c.id
-            WHERE c.topic_id = ? AND e.model = ?
-        """;
+                    SELECT COUNT(*) FROM embedding e
+                    JOIN chunk c ON e.chunk_id = c.id
+                    WHERE c.topic_id = ? AND e.model = ?
+                """;
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, topicId);
             pstmt.setString(2, model);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -185,8 +188,8 @@ public class EmbeddingDao {
         String sql = "DELETE FROM embedding WHERE chunk_id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, chunkId);
             int deleted = pstmt.executeUpdate();
             logger.debug("Deleted {} embeddings for chunk {}", deleted, chunkId);
@@ -195,12 +198,11 @@ public class EmbeddingDao {
 
     private Embedding mapRow(ResultSet rs) throws SQLException {
         return new Embedding(
-            rs.getInt("id"),
-            rs.getInt("chunk_id"),
-            rs.getString("model"),
-            deserializeVector(rs.getBytes("vector")),
-            rs.getString("created_at")
-        );
+                rs.getInt("id"),
+                rs.getInt("chunk_id"),
+                rs.getString("model"),
+                deserializeVector(rs.getBytes("vector")),
+                rs.getString("created_at"));
     }
 
     /**
@@ -229,5 +231,6 @@ public class EmbeddingDao {
     /**
      * Input record for batch embedding creation.
      */
-    public record EmbeddingInput(int chunkId, String model, float[] vector) {}
+    public record EmbeddingInput(int chunkId, String model, float[] vector) {
+    }
 }

@@ -14,7 +14,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Client for OpenAI API interactions, specifically for embedding generation.
@@ -26,28 +26,61 @@ public class OpenAIClient {
     private static final String DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
     private static final String DEFAULT_CHAT_MODEL = "gpt-4";
     private static final int DEFAULT_TIMEOUT_SECONDS = 30;
-    
+
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final String apiKey;
-    private final String embeddingModel;
 
     public OpenAIClient() {
-        ConfigManager config = ConfigManager.getInstance();
-        this.apiKey = (String) config.get("openai.apiKey");
-        if (this.apiKey == null || this.apiKey.isBlank()) {
-            logger.warn("OpenAI API key not configured. Set 'openai.apiKey' in configuration.");
-        }
-        
-        this.embeddingModel = (String) config.get("openai.embeddingModel");
-        if (this.embeddingModel == null || this.embeddingModel.isBlank()) {
-            logger.info("Using default embedding model: {}", DEFAULT_EMBEDDING_MODEL);
-        }
-        
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS))
                 .build();
         this.objectMapper = new ObjectMapper();
+    }
+
+    /**
+     * Get the API key from configuration (read dynamically to support runtime
+     * config changes).
+     */
+    @SuppressWarnings("unchecked")
+    private String getApiKey() {
+        ConfigManager config = ConfigManager.getInstance();
+        Map<String, Object> openai = (Map<String, Object>) config.get("openai");
+        if (openai != null) {
+            return (String) openai.get("apiKey");
+        }
+        return null;
+    }
+
+    /**
+     * Get the embedding model from configuration.
+     */
+    @SuppressWarnings("unchecked")
+    private String getEmbeddingModelFromConfig() {
+        ConfigManager config = ConfigManager.getInstance();
+        Map<String, Object> openai = (Map<String, Object>) config.get("openai");
+        if (openai != null) {
+            String model = (String) openai.get("embeddingModel");
+            if (model != null && !model.isBlank()) {
+                return model;
+            }
+        }
+        return DEFAULT_EMBEDDING_MODEL;
+    }
+
+    /**
+     * Get the chat model from configuration.
+     */
+    @SuppressWarnings("unchecked")
+    private String getChatModelFromConfig() {
+        ConfigManager config = ConfigManager.getInstance();
+        Map<String, Object> openai = (Map<String, Object>) config.get("openai");
+        if (openai != null) {
+            String model = (String) openai.get("chatModel");
+            if (model != null && !model.isBlank()) {
+                return model;
+            }
+        }
+        return DEFAULT_CHAT_MODEL;
     }
 
     /**
@@ -58,13 +91,12 @@ public class OpenAIClient {
      * @throws IOException If the API call fails
      */
     public float[] generateEmbedding(String text) throws IOException, InterruptedException {
+        String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("OpenAI API key is not configured");
         }
 
-        String model = (embeddingModel != null && !embeddingModel.isBlank()) 
-                ? embeddingModel 
-                : DEFAULT_EMBEDDING_MODEL;
+        String model = getEmbeddingModelFromConfig();
 
         // Build request body
         ObjectNode requestBody = objectMapper.createObjectNode();
@@ -88,7 +120,7 @@ public class OpenAIClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            String errorMsg = String.format("OpenAI API returned status %d: %s", 
+            String errorMsg = String.format("OpenAI API returned status %d: %s",
                     response.statusCode(), response.body());
             logger.error(errorMsg);
             throw new IOException(errorMsg);
@@ -97,7 +129,7 @@ public class OpenAIClient {
         // Parse response
         JsonNode root = objectMapper.readTree(response.body());
         JsonNode dataArray = root.get("data");
-        
+
         if (dataArray == null || !dataArray.isArray() || dataArray.isEmpty()) {
             throw new IOException("Invalid response from OpenAI: missing 'data' array");
         }
@@ -122,50 +154,45 @@ public class OpenAIClient {
      * Get the configured embedding model name.
      */
     public String getEmbeddingModel() {
-        return (embeddingModel != null && !embeddingModel.isBlank()) 
-                ? embeddingModel 
-                : DEFAULT_EMBEDDING_MODEL;
+        return getEmbeddingModelFromConfig();
     }
 
     /**
      * Generate a chat completion using OpenAI API.
      * 
-     * @param systemMessage The system message setting the context
-     * @param userMessage The user message with the query
-     * @param responseFormat Optional response format (e.g., "json_object"), null for default
+     * @param systemMessage  The system message setting the context
+     * @param userMessage    The user message with the query
+     * @param responseFormat Optional response format (e.g., "json_object"), null
+     *                       for default
      * @return The assistant's response text
-     * @throws IOException If the API call fails
+     * @throws IOException          If the API call fails
      * @throws InterruptedException If the operation is interrupted
      */
-    public String generateChatCompletion(String systemMessage, String userMessage, String responseFormat) 
+    public String generateChatCompletion(String systemMessage, String userMessage, String responseFormat)
             throws IOException, InterruptedException {
-        
+
+        String apiKey = getApiKey();
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException("OpenAI API key is not configured");
         }
 
-        ConfigManager config = ConfigManager.getInstance();
-        String chatModel = (String) config.get("openai.chatModel");
-        if (chatModel == null || chatModel.isBlank()) {
-            chatModel = DEFAULT_CHAT_MODEL;
-            logger.debug("Using default chat model: {}", chatModel);
-        }
+        String chatModel = getChatModelFromConfig();
 
         // Build request body
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", chatModel);
-        
+
         // Add messages
         ArrayNode messages = requestBody.putArray("messages");
-        
+
         ObjectNode systemMsg = messages.addObject();
         systemMsg.put("role", "system");
         systemMsg.put("content", systemMessage);
-        
+
         ObjectNode userMsg = messages.addObject();
         userMsg.put("role", "user");
         userMsg.put("content", userMessage);
-        
+
         // Add response format if specified
         if (responseFormat != null && !responseFormat.isBlank()) {
             ObjectNode formatNode = requestBody.putObject("response_format");
@@ -189,7 +216,7 @@ public class OpenAIClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            String errorMsg = String.format("OpenAI Chat API returned status %d: %s", 
+            String errorMsg = String.format("OpenAI Chat API returned status %d: %s",
                     response.statusCode(), response.body());
             logger.error(errorMsg);
             throw new IOException(errorMsg);
@@ -198,7 +225,7 @@ public class OpenAIClient {
         // Parse response
         JsonNode root = objectMapper.readTree(response.body());
         JsonNode choices = root.get("choices");
-        
+
         if (choices == null || !choices.isArray() || choices.isEmpty()) {
             throw new IOException("Invalid response from OpenAI: missing 'choices' array");
         }
@@ -210,12 +237,13 @@ public class OpenAIClient {
 
         String content = message.get("content").asText();
         logger.debug("Received chat completion of length {}", content.length());
-        
+
         return content;
     }
 
     /**
      * Record representing a chat message.
      */
-    public record ChatMessage(String role, String content) {}
+    public record ChatMessage(String role, String content) {
+    }
 }

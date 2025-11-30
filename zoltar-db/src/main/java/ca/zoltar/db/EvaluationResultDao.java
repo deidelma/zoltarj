@@ -21,43 +21,46 @@ public class EvaluationResultDao {
             int noveltyScore,
             String rationale,
             String usedChunkIdsJson,
-            String hybridScoresJson
-    ) {}
+            String hybridScoresJson) {
+    }
 
     /**
      * Create a new evaluation result record.
      * 
-     * @param runId The evaluation run ID
-     * @param noveltyLabel The novelty classification ("novel", "uncertain", "not_novel")
-     * @param noveltyScore The novelty score (0-10)
-     * @param rationale Free-text explanation of the evaluation
+     * @param runId            The evaluation run ID
+     * @param noveltyLabel     The novelty classification ("novel", "uncertain",
+     *                         "not_novel")
+     * @param noveltyScore     The novelty score (0-10)
+     * @param rationale        Free-text explanation of the evaluation
      * @param usedChunkIdsJson JSON array of chunk IDs used as context
      * @param hybridScoresJson JSON object mapping chunk IDs to their hybrid scores
      * @return The ID of the created evaluation result
      * @throws SQLException If database operation fails
      */
     public int create(int runId, String noveltyLabel, int noveltyScore, String rationale,
-                      String usedChunkIdsJson, String hybridScoresJson) throws SQLException {
-        
+            String usedChunkIdsJson, String hybridScoresJson) throws SQLException {
+
         String sql = "INSERT INTO evaluation_result (run_id, novelty_label, novelty_score, rationale, " +
-                     "used_chunk_ids_json, hybrid_scores_json) VALUES (?, ?, ?, ?, ?, ?)";
+                "used_chunk_ids_json, hybrid_scores_json) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, runId);
             pstmt.setString(2, noveltyLabel);
             pstmt.setInt(3, noveltyScore);
             pstmt.setString(4, rationale);
             pstmt.setString(5, usedChunkIdsJson);
             pstmt.setString(6, hybridScoresJson);
-            
+
             pstmt.executeUpdate();
-            
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+
+            // Use last_insert_rowid() for SQLite compatibility
+            try (Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
                 if (rs.next()) {
                     int id = rs.getInt(1);
-                    logger.info("Created evaluation result {} for run {} with label '{}'", 
+                    logger.info("Created evaluation result {} for run {} with label '{}'",
                             id, runId, noveltyLabel);
                     return id;
                 } else {
@@ -78,10 +81,10 @@ public class EvaluationResultDao {
         String sql = "SELECT * FROM evaluation_result WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, id);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
@@ -102,10 +105,10 @@ public class EvaluationResultDao {
         String sql = "SELECT * FROM evaluation_result WHERE run_id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, runId);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return mapRow(rs);
@@ -127,8 +130,8 @@ public class EvaluationResultDao {
         List<EvaluationResult> results = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, noveltyLabel);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -149,8 +152,8 @@ public class EvaluationResultDao {
         String sql = "DELETE FROM evaluation_result WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, id);
             int deleted = pstmt.executeUpdate();
             logger.debug("Deleted {} evaluation result(s) with ID {}", deleted, id);
@@ -165,7 +168,6 @@ public class EvaluationResultDao {
                 rs.getInt("novelty_score"),
                 rs.getString("rationale"),
                 rs.getString("used_chunk_ids_json"),
-                rs.getString("hybrid_scores_json")
-        );
+                rs.getString("hybrid_scores_json"));
     }
 }

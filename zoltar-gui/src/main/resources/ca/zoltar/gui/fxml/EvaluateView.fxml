@@ -5,52 +5,52 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ca.zoltar.gui.controller.EvaluateViewController"
-      spacing="10">
-    
+    xmlns:fx="http://javafx.com/fxml" fx:controller="ca.zoltar.gui.controller.EvaluateViewController" spacing="10">
+
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
-    
+
     <Label text="Evaluate Abstracts" styleClass="section-title"/>
-    
+
     <GridPane hgap="10" vgap="10">
         <Label text="Topic:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
         <ComboBox fx:id="topicCombo" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="300"/>
-        
+
         <Label text="LLM Model:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
         <ComboBox fx:id="modelCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="300"/>
     </GridPane>
-    
+
     <Label text="Parameters:" styleClass="field-label"/>
     <GridPane hgap="10" vgap="10">
         <Label text="Alpha (α):" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <Slider fx:id="alphaSlider" min="0" max="1" value="0.6" showTickLabels="true" showTickMarks="true" 
-                GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="200"/>
-        <Label fx:id="alphaLabel" text="0.6" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-        
+        <Slider fx:id="alphaSlider" min="0" max="1" value="0.6" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="200"/>
+        <Label fx:id="alphaLabel" text="0.60" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+
         <Label text="K Context:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <Spinner fx:id="kContextSpinner" initialValue="30" min="5" max="100" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        <Spinner fx:id="kContextSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
     </GridPane>
-    
-    <HBox spacing="10">
-        <Button text="Evaluate Selected" onAction="#handleEvaluateSelected" disable="true"/>
-        <Button text="Evaluate All" onAction="#handleEvaluateAll" disable="true"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button fx:id="evaluateSelectedButton" text="Evaluate Selected" onAction="#handleEvaluateSelected" disable="true"/>
+        <Button fx:id="evaluateAllButton" text="Evaluate All" onAction="#handleEvaluateAll" disable="true"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="statusLabel" text=""/>
     </HBox>
-    
-    <TableView fx:id="abstractsTable" VBox.vgrow="ALWAYS">
+
+    <TableView fx:id="abstractsTable" VBox.vgrow="ALWAYS" editable="true">
         <columns>
-            <TableColumn text="PMID" prefWidth="100"/>
-            <TableColumn text="Title" prefWidth="400"/>
-            <TableColumn text="Journal" prefWidth="150"/>
-            <TableColumn text="Evaluation Status" prefWidth="150"/>
+            <TableColumn fx:id="selectColumn" text="Select" prefWidth="60" editable="true"/>
+            <TableColumn fx:id="pmidColumn" text="PMID" prefWidth="100"/>
+            <TableColumn fx:id="titleColumn" text="Title" prefWidth="350"/>
+            <TableColumn fx:id="journalColumn" text="Journal" prefWidth="150"/>
+            <TableColumn fx:id="statusColumn" text="Evaluation Status" prefWidth="200"/>
         </columns>
         <placeholder>
             <Label text="Select a topic to view abstracts"/>
         </placeholder>
     </TableView>
-    
+
     <ProgressBar fx:id="progressBar" prefWidth="Infinity" visible="false"/>
-    
+
 </VBox>

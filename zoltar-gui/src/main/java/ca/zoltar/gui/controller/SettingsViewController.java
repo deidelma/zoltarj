@@ -11,36 +11,54 @@ import java.util.Map;
 
 public class SettingsViewController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsViewController.class);
-    
-    @FXML private PasswordField apiKeyField;
-    @FXML private TextField chatModelField;
-    @FXML private TextField embeddingModelField;
-    @FXML private Spinner<Integer> chunkSizeSpinner;
-    @FXML private Spinner<Integer> chunkOverlapSpinner;
-    @FXML private Spinner<Double> defaultAlphaSpinner;
-    @FXML private Label statusLabel;
-    
+
+    @FXML
+    private PasswordField apiKeyField;
+    @FXML
+    private TextField chatModelField;
+    @FXML
+    private TextField embeddingModelField;
+    @FXML
+    private Spinner<Integer> chunkSizeSpinner;
+    @FXML
+    private Spinner<Integer> chunkOverlapSpinner;
+    @FXML
+    private Spinner<Double> defaultAlphaSpinner;
+    @FXML
+    private Label statusLabel;
+
     private final ConfigManager configManager = ConfigManager.getInstance();
-    
+
     @FXML
     public void initialize() {
         logger.info("SettingsViewController initialized");
         loadSettings();
     }
-    
+
     @SuppressWarnings("unchecked")
     private void loadSettings() {
         // Load OpenAI settings
-        String apiKey = (String) configManager.get("openai.apiKey");
-        String chatModel = (String) configManager.get("openai.chatModel");
-        String embeddingModel = (String) configManager.get("openai.embeddingModel");
-        
-        if (apiKey != null) apiKeyField.setText(apiKey);
-        if (chatModel != null) chatModelField.setText(chatModel);
-        else chatModelField.setText("gpt-4o-mini");
-        if (embeddingModel != null) embeddingModelField.setText(embeddingModel);
-        else embeddingModelField.setText("text-embedding-3-small");
-        
+        Map<String, Object> openai = (Map<String, Object>) configManager.get("openai");
+        if (openai != null) {
+            String apiKey = (String) openai.get("apiKey");
+            String chatModel = (String) openai.get("chatModel");
+            String embeddingModel = (String) openai.get("embeddingModel");
+
+            if (apiKey != null)
+                apiKeyField.setText(apiKey);
+            if (chatModel != null)
+                chatModelField.setText(chatModel);
+            else
+                chatModelField.setText("gpt-4o-mini");
+            if (embeddingModel != null)
+                embeddingModelField.setText(embeddingModel);
+            else
+                embeddingModelField.setText("text-embedding-3-small");
+        } else {
+            chatModelField.setText("gpt-4o-mini");
+            embeddingModelField.setText("text-embedding-3-small");
+        }
+
         // Load indexing settings
         Map<String, Object> indexing = (Map<String, Object>) configManager.get("indexing");
         if (indexing != null) {
@@ -51,10 +69,10 @@ public class SettingsViewController {
                 chunkOverlapSpinner.getValueFactory().setValue((Integer) indexing.get("chunkOverlap"));
             }
         }
-        
+
         setStatus("Settings loaded");
     }
-    
+
     @FXML
     private void handleSave() {
         try {
@@ -64,24 +82,38 @@ public class SettingsViewController {
             openai.put("chatModel", chatModelField.getText());
             openai.put("embeddingModel", embeddingModelField.getText());
             configManager.set("openai", openai);
-            
+
             // Save indexing settings
             Map<String, Object> indexing = new HashMap<>();
             indexing.put("chunkSize", chunkSizeSpinner.getValue());
             indexing.put("chunkOverlap", chunkOverlapSpinner.getValue());
             configManager.set("indexing", indexing);
-            
+
             configManager.saveConfig();
-            
+
             setStatus("Settings saved successfully");
             logger.info("Settings saved");
-            
+
+            // Show confirmation dialog
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Settings Saved");
+            alert.setHeaderText(null);
+            alert.setContentText(
+                    "Settings have been saved successfully. Restart the application for changes to take full effect.");
+            alert.showAndWait();
+
         } catch (Exception e) {
             logger.error("Failed to save settings", e);
             setStatus("Error: " + e.getMessage());
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Save Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to save settings: " + e.getMessage());
+            alert.showAndWait();
         }
     }
-    
+
     @FXML
     private void handleReset() {
         chatModelField.setText("gpt-4o-mini");
@@ -90,7 +122,7 @@ public class SettingsViewController {
         chunkOverlapSpinner.getValueFactory().setValue(128);
         setStatus("Reset to defaults");
     }
-    
+
     private void setStatus(String message) {
         statusLabel.setText(message);
     }

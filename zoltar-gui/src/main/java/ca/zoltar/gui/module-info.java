@@ -6,7 +6,9 @@ module ca.zoltar.gui {
     requires ca.zoltar.util;
     requires java.sql;
     requires org.slf4j;
+    requires com.fasterxml.jackson.databind;
 
     exports ca.zoltar.gui;
+
     opens ca.zoltar.gui.controller to javafx.fxml;
 }

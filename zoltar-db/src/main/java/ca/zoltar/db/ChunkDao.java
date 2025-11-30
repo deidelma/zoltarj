@@ -11,15 +11,17 @@ import java.util.List;
 public class ChunkDao {
     private static final Logger logger = LoggerFactory.getLogger(ChunkDao.class);
 
-    public record Chunk(int id, int documentId, int topicId, int chunkIndex, String text, int tokens, Integer luceneDocId, String addedAt) {}
+    public record Chunk(int id, int documentId, int topicId, int chunkIndex, String text, int tokens,
+            Integer luceneDocId, String addedAt) {
+    }
 
     public void batchCreate(List<Chunk> chunks) throws SQLException {
         String sql = "INSERT INTO chunk (document_id, topic_id, chunk_index, text, tokens, added_at) VALUES (?, ?, ?, ?, ?, ?)";
         String now = LocalDateTime.now().toString();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             conn.setAutoCommit(false);
             try {
                 for (Chunk chunk : chunks) {
@@ -47,8 +49,8 @@ public class ChunkDao {
         List<Chunk> chunks = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, documentId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -64,8 +66,8 @@ public class ChunkDao {
         List<Chunk> chunks = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, topicId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -80,8 +82,8 @@ public class ChunkDao {
         String sql = "SELECT * FROM chunk WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -96,8 +98,8 @@ public class ChunkDao {
         String sql = "SELECT COUNT(*) FROM chunk WHERE topic_id = ?";
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, topicId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -108,16 +110,34 @@ public class ChunkDao {
         return 0;
     }
 
+    public int countByDocumentId(int documentId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM chunk WHERE document_id = ?";
+
+        try (Connection conn = DatabaseManager.getInstance().getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, documentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
+
     private Chunk mapRow(ResultSet rs) throws SQLException {
+        int luceneDocId = rs.getInt("lucene_doc_id");
+        Integer luceneDocIdBoxed = rs.wasNull() ? null : luceneDocId;
+
         return new Chunk(
-            rs.getInt("id"),
-            rs.getInt("document_id"),
-            rs.getInt("topic_id"),
-            rs.getInt("chunk_index"),
-            rs.getString("text"),
-            rs.getInt("tokens"),
-            rs.getObject("lucene_doc_id") != null ? rs.getInt("lucene_doc_id") : null,
-            rs.getString("added_at")
-        );
+                rs.getInt("id"),
+                rs.getInt("document_id"),
+                rs.getInt("topic_id"),
+                rs.getInt("chunk_index"),
+                rs.getString("text"),
+                rs.getInt("tokens"),
+                luceneDocIdBoxed,
+                rs.getString("added_at"));
     }
 }
