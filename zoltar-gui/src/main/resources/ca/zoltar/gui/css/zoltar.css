@@ -137,6 +137,14 @@
     -fx-text-fill: #263238;
 }
 
+.title-label {
+    -fx-font-size: 20px;
+    font-size: 20px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-text-fill: #FFFFFF;
+}
+
 .section-title {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
