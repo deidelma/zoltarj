@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SettingsViewController {
     private static final Logger logger = LoggerFactory.getLogger(SettingsViewController.class);
@@ -44,16 +45,11 @@ public class SettingsViewController {
             String chatModel = (String) openai.get("chatModel");
             String embeddingModel = (String) openai.get("embeddingModel");
 
-            if (apiKey != null)
+            if (apiKey != null) {
                 apiKeyField.setText(apiKey);
-            if (chatModel != null)
-                chatModelField.setText(chatModel);
-            else
-                chatModelField.setText("gpt-4o-mini");
-            if (embeddingModel != null)
-                embeddingModelField.setText(embeddingModel);
-            else
-                embeddingModelField.setText("text-embedding-3-small");
+            }
+            chatModelField.setText(Objects.requireNonNullElse(chatModel, "gpt-4o-mini"));
+            embeddingModelField.setText(Objects.requireNonNullElse(embeddingModel, "text-embedding-3-small"));
         } else {
             chatModelField.setText("gpt-4o-mini");
             embeddingModelField.setText("text-embedding-3-small");

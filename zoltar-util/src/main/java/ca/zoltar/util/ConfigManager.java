@@ -55,7 +55,8 @@ public class ConfigManager {
     private void loadConfig() {
         if (Files.exists(configPath)) {
             try {
-                config = mapper.readValue(configPath.toFile(), new TypeReference<Map<String, Object>>() {});
+                config = mapper.readValue(configPath.toFile(), new TypeReference<>() {
+                });
                 logger.info("Loaded configuration from {}", configPath);
             } catch (IOException e) {
                 logger.error("Failed to load configuration", e);

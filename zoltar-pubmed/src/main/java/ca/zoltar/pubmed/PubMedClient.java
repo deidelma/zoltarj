@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Client for PubMed E-utilities API.
- * 
+ * <p>
  * Uses ESearch for searching and EFetch for retrieving article details.
  * Implements NCBI API guidelines including rate limiting.
  * 

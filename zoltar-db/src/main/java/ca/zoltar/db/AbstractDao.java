@@ -50,8 +50,9 @@ public class AbstractDao {
             return existing.id();
         }
 
-        String sql = "INSERT INTO abstract (topic_id, pmid, title, authors_json, journal, pub_date, abstract_text, added_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = """
+                INSERT INTO abstract (topic_id, pmid, title, authors_json, journal, pub_date, abstract_text, added_at) \
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""";
         String now = LocalDateTime.now().toString();
 
         try (Connection conn = DatabaseManager.getInstance().getConnection();

@@ -59,8 +59,7 @@ public class DatabaseManager {
         }
 
         Path appDir = ConfigManager.getInstance().getAppDir();
-        Path dbPath = appDir.resolve(DB_FILE_NAME);
-        return dbPath;
+        return appDir.resolve(DB_FILE_NAME);
     }
 
     private void initializeDatabase() {

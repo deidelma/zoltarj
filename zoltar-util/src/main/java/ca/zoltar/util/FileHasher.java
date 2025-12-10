@@ -15,7 +15,11 @@ public class FileHasher {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             try (InputStream is = Files.newInputStream(path);
                  DigestInputStream dis = new DigestInputStream(is, digest)) {
-                while (dis.read() != -1) {} // Read all bytes
+                byte[] buffer = new byte[8192];
+                //noinspection StatementWithEmptyBody
+                while (dis.read(buffer) != -1) {
+                    // Digest is automatically updated as bytes are read
+                }
             }
             byte[] hashBytes = digest.digest();
             return bytesToHex(hashBytes);
